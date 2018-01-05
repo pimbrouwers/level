@@ -1,0 +1,24 @@
+RewriteEngine on
+RewriteBase /
+
+# Error Page(s)
+ErrorDocument 403 /public/errors/404.php
+ErrorDocument 404 /public/errors/404.php
+
+# Prevent access to .txt & .yml files
+RedirectMatch 404 \.(txt|yml)$
+
+# Prevent POST's
+# Allow the server to POST to itself
+# Send all other requests to 403
+RewriteCond %{REQUEST_METHOD} POST
+RewriteCond %{REMOTE_ADDR} !127.0.0.1 
+RewriteRule ^ / [F]   
+
+# Route all unmatched to index.php
+# NC: not case senstitive
+# L: stop here
+# QSA: pass along query string
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ /index.php?path=$1 [NC,L,QSA]

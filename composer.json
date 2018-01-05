@@ -1,0 +1,9 @@
+{
+    "name": "pimbrouwers/level",
+    "description": "Dead simple, database-less and cheap content management",
+    "type": "project",
+    "require": {
+        "symfony/yaml": "^4.0"
+    },
+    "license": "MIT"
+}
