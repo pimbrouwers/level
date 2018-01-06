@@ -20,7 +20,7 @@ class YamlParser {
     }
     catch (ParseException $e)
     {
-      Helpers::Http500($e);
+      throw $e;
     }
     
     return $content;
