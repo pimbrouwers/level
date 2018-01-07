@@ -9,7 +9,7 @@ class Config {
   static $rootFolder = './';
   static $levelFolder = './level';
 	static $adminFolder = './level/admin';
-	static $errorsFolder = './templates/errors';
+	static $errorsFolder = './public/errors';
 	static $pagesFolder = './pages';
 	static $pagesCacheFolder = './cache/pages';
 	static $templatesFolder = './templates';
