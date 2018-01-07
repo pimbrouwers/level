@@ -8,10 +8,11 @@ class Config {
 
   static $rootFolder = './';
   static $levelFolder = './level';
-  static $adminFolder = './level/admin';
-  static $templatesFolder = './templates';
-  static $errorsFolder = './templates/errors';
-  static $pagesFolder = './pages';
-
+	static $adminFolder = './level/admin';
+	static $errorsFolder = './templates/errors';
+	static $pagesFolder = './pages';
+	static $pagesCacheFolder = './cache/pages';
+	static $templatesFolder = './templates';
+  
   static $defaultTemplate = 'default.php';
 }

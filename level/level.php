@@ -12,6 +12,8 @@ use Level\Page;
 
 class Level {
 
+	public $pageDir = '';
+
   /**
    * Level App
    * @param array $request The $_GET superglobal
@@ -19,15 +21,28 @@ class Level {
   function __construct($request)
   {
     # Resolve page directory from $_GET
-    $pageDir = $this->pageDirFromRequest($request);
+    $this->pageDir = $this->pageDirFromRequest($request);
 
-    if(!$this->pageExists($pageDir)) {
+    if(!$this->pageExists($this->pageDir)) {
       # Page doesn't exist
       Helpers::Http404();
-    }
+    }	
+	}
+	
+	/**
+	 * Render the requested page
+	 */
+	function renderPage() 
+	{
+		# Check pages cache 
+		//TODO write caching layer
 
-    $page = new Page($pageDir);
-  }
+		# No page cache, create, cache and render
+		$page = new Page($this->pageDir);
+		$pageOutput = $page->render();
+
+		echo $pageOutput;
+	}
 
   /** 
    * Generates potential page directory from $_GET['path']

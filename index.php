@@ -17,3 +17,4 @@ else {
 
 # Start app and process request
 $app = new Level($_GET);
+$app->renderPage();

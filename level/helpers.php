@@ -21,7 +21,7 @@ class Helpers {
    */
   static function Http500($exception) {
     if(Config::$dev_mode){
-      var_dump($exception);
+      echo $exception->getMessage();
     }
 
     self::HttpResponse(500);
