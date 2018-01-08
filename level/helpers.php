@@ -8,6 +8,15 @@ use Level\Config;
 
 class Helpers {
 
+	/**
+	 * Checks for the absolute existence of a string value
+	 * @param string $str The string to validate
+	 * @return bool 
+	 */
+	function IsNullOrWhiteSpace($str){
+			return (!isset($str) || trim($str)==='');
+	}
+
   /**
    * Renders the 404 page 
    */

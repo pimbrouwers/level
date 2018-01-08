@@ -30,21 +30,48 @@ class Level {
 	/**
 	 * Render the requested page
 	 */
-	function renderPage() 
+	function handleRequest() 
 	{
 		if(!$this->pageExists($this->pageDir)) {
       # Page doesn't exist
       Helpers::Http404();
 		}	
-		
-		# Check pages cache 
-		//TODO write caching layer
 
-		# No page cache, create, cache and render
-		$page = new Page($this->pageDir);
-		$pageOutput = $page->render();
+		# Check pages cache
+		$pageOutput = $this->loadPageFromCache();
+
+		if(Helpers::IsNullOrWhiteSpace($pageOutput))
+		{
+			# Cache empty, render
+			$pageOutput = $this->renderPage();
+
+			if(Helpers::IsNullOrWhiteSpace($pageOutput))
+			{
+				# Cache result, if exists
+				$this->cachePage($pageOutput);
+			}
+		}	
 
 		echo $pageOutput;
+	}
+
+	/**
+	 * Insert the page into cache
+	 * @param string $pageOutput The rendered HTML
+	 */
+	private function cachePage($pageOutput)
+	{
+		//TODO write page cacher
+	}
+
+	/**
+	 * Load page from cache, if possible
+	 * @return string $pageOutput The rendered HTML
+	 */
+	private function loadPageFromCache()
+	{
+		//TODO write caching layer
+		return '';
 	}
 
   /** 
@@ -70,5 +97,17 @@ class Level {
   private function pageExists($pageDir)
   {
     return is_dir($pageDir);
-  }
+	}
+	
+	/**
+	 * The physical output buffering of the request page
+	 */
+	private function renderPage()
+	{		
+		# No page cache, create, cache and render
+		$page = new Page($this->pageDir);
+		$pageOutput = $page->render();
+
+		return $pageOutput;
+	}
 }

@@ -17,4 +17,4 @@ else {
 
 # Start app and process request
 $app = new Level($_SERVER, $_GET);
-$app->renderPage();
+$app->handleRequest();
