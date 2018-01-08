@@ -12,21 +12,23 @@ use Level\YamlParser;
 
 class Page {
 
+	public $children = array();
+	public $contentType = '';
+	public $dir = '';
+	public $name = '';
+	public $path = '';
 	public $template = '';
-	public $content = [];
-
+	
 	/**
 	 * Page object
-	 * @param string $dir The directory containing the page data
+	 * @param string $dir The absolute directory containing the page data
 	 */
 	function __construct($dir)
-	{
-		# Parse YAML
-		$parser = new YamlParser();
-		$this->content = $parser->getContent($this->contentFilePath($dir));    
-
-		# Determine template from YAML
-		$this->template = $this->resolveTemplate($this->content);
+	{		
+		$this->dir = $dir;		
+		$this->path = $this->pagePath($dir);
+		$this->name = $this->pageName();
+		$this->template = $this->resolveTemplate();
 	} 
 
 	/**
@@ -35,17 +37,21 @@ class Page {
 	 */
 	function render()
 	{    
-		$templatePath = Config::$templatesFolder . DIRECTORY_SEPARATOR . $this->template;
-		
-		if(!file_exists($templatePath))
+		# Parse content
+		$pageContent = $this->pageContent();
+
+		# Determine content type from template
+		//TODO resolve content type from template extension
+
+		# extract page key/value's
+		if(is_array($pageContent))
 		{
-			Helpers::Http500(new Exception('Template ' . $templatePath . ' not found.'));
-		}
+			extract($pageContent);
+		}	
 
-		extract($this->content);
-
+		# buffer the page
 		ob_start();
-		include_once($templatePath);
+		include_once($this->template);				
 		$output = ob_get_contents();
 		ob_end_clean();
 
@@ -54,42 +60,73 @@ class Page {
 
 	/**
 	 * Resolve page content file based on provided dir 
-	 * @param string $dir Directory containing the page date
 	 * @return string $filePath YAML relative file path
 	 */
-	private function contentFilePath($dir)
+	private function contentFilePath()
 	{
-		$filePathWithoutExtension = $dir . '/page';
-		$filePath = $filePathWithoutExtension . '.yml';
+		$filePath = '';		
+		$foldersAndFiles = Helpers::DirectoryContents($this->dir);
 		
-		if(!file_exists($filePath))
-		{   
-			$filePath = $filePathWithoutExtension . '.txt';
-			
-			if(!file_exists($filePath))
+		foreach($foldersAndFiles as $folderOrFile)
+		{
+			if(!is_dir($folderOrFile))
 			{
-				# No page.yml or page.txt found, throw 404
-				Helpers::Http404();
-			}    
-		}
+				$pathinfo = pathinfo($folderOrFile);
 
+				if($pathinfo['extension'] == 'yml')
+				{
+					$filePath = $this->dir . '/' . $folderOrFile;
+					break;
+				}
+			}
+		}
+		
 		return $filePath;
 	}
 
-	/** 
-	 * Sets the page template 
-	 * @param array $content Parsed YAML content
-	 * @return string $template Template php filename
+	/**
+	 * Get page content from yaml
+	 * @return array
 	 */
-	private function resolveTemplate($content)
+	private function pageContent(){
+		# Parse YAML
+		$parser = new YamlParser();
+		return $parser->getContent($this->contentFilePath($this->dir));    
+	}
+
+	/**
+	 * Get the name from the path
+	 * @return string
+	 */
+	private function pageName()
 	{
-		$template = Config::$defaultTemplate;
-		
-		if(array_key_exists('template', $content))
+		return basename($this->path);
+	}
+
+	/**
+	 * Get the page path from the page dir
+	 * @param string $dir The page dir
+	 * @return string
+	 */
+	private function pagePath($dir)
+	{
+		return preg_replace(array('/\d\./', '/^\.\/pages\//', '/index$/'), '', $dir);
+	}
+
+	/**
+	 * Resolve page template file path
+	 * @return string $templatePath PHP template path
+	 */
+	private function resolveTemplate()
+	{		
+		$templatePath = Config::$templatesFolder . '/' . $this->name . '.php';
+
+		if(!file_exists($templatePath))
 		{
-			$template = $content['template'];      
+			# default template to config value
+			$templatePath = Config::$templatesFolder . '/' . Config::$defaultTemplate;
 		}
-		
-		return $template;
+
+		return $templatePath;		
 	}
 }

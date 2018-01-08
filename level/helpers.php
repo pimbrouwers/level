@@ -8,12 +8,22 @@ use Level\Config;
 
 class Helpers {
 
+  /**
+   * Returns the contents of a directory, ignoring . & .. entries
+   * @param string $dir
+   * @return array 
+   */
+  static function DirectoryContents($dir)
+  {
+    return array_slice(scandir($dir), 2);
+  }
+
 	/**
 	 * Checks for the absolute existence of a string value
 	 * @param string $str The string to validate
 	 * @return bool 
 	 */
-	function IsNullOrWhiteSpace($str){
+	static function IsNullOrWhiteSpace($str){
 			return (!isset($str) || trim($str)==='');
 	}
 
@@ -29,11 +39,18 @@ class Helpers {
    * @param exception $exception The exception being thrown
    */
   static function Http500($exception) {
-    if(Config::$dev_mode){
+    if(Config::$devMode){
       echo $exception->getMessage();
     }
 
     self::HttpResponse(500);
+  }
+
+  static function PrettyPrint($obj)
+  {
+    echo '<pre>';
+    print_r($obj);
+    echo '</pre>';
   }
 
   /**
@@ -46,4 +63,5 @@ class Helpers {
     include_once(Config::$errorsFolder . '/' . $code . '.php');
     exit;
   }
+
 }

@@ -12,8 +12,10 @@ use Level\Page;
 
 class Level {
 
-	public $pageDir = '';
-
+	public $pages = array();
+	public $query = array();
+	public $request = array();
+	
 	/**
 	 * Level App
 	 * @param string $request The $_SERVER superglobal
@@ -23,91 +25,106 @@ class Level {
 	{
 		//TODO use $query to support previewing from admin
 
-		# Resolve page directory from $_GET
-		$this->pageDir = $this->pageDirFromRequest($request);
+		$this->query = $query;
+		$this->request = $request;
 	}
 	
 	/**
-	 * Render the requested page
+	 * Handle the submitted request
 	 */
 	function handleRequest() 
 	{
-		if(!$this->pageExists($this->pageDir)) {
-			# Page doesn't exist
-			Helpers::Http404();
-		}	
-
 		# Check pages cache
-		$pageOutput = $this->loadPageFromCache();
+		//TODO write caching layer
+		$pageOutput = '';
 
+		# If page not in cache, build & cache
 		if(Helpers::IsNullOrWhiteSpace($pageOutput))
 		{
-			# Cache empty, render
-			$pageOutput = $this->renderPage();
+			# extract uri from request
+			$requestUri = $this->uriFromRequest();
+			
+			# lookup page in $this->pages comparing $requestUri to $page->path
+			$page = $this->lookupPage($requestUri, $this->buildPageTree(Config::$pagesFolder));
+			
+			if(!$page) {				
+				# Page doesn't exist
+				Helpers::Http404();
+			}	
 
-			if(Helpers::IsNullOrWhiteSpace($pageOutput))
-			{
-				# Cache result, if exists
-				$this->cachePage($pageOutput);
-			}
+			# Cache empty, render page
+			$pageOutput = $page->render();
+
+			# Write output to cache
+			//TODO write caching layer
 		}	
 
 		echo $pageOutput;
 	}
 
 	/**
-	 * Insert the page into cache
-	 * @param string $pageOutput The rendered HTML
+	 * Recursively builds site structure from pages folder (Config::$pagesFolder)
+	 * @param string $dir The directory to parse
+	 * @return array $pages Nested collection of Level\Page objects
 	 */
-	private function cachePage($pageOutput)
+	private function buildPageTree($dir)
 	{
-		//TODO write page cacher
+		$pages = array();
+		$foldersAndFiles = Helpers::DirectoryContents($dir);
+    
+    # prevent empty ordered elements
+    if (count($foldersAndFiles) > 0)
+    {		
+      foreach($foldersAndFiles as $folderOrFile)
+      {        
+        $absolutePath = $dir . '/' . $folderOrFile;
+        
+        if(is_dir($absolutePath))
+        {
+					$page = new Page($absolutePath);
+
+					array_push($pages, $page);
+					
+          $page->children = $this->buildPageTree($absolutePath);
+        }
+      }
+    }
+
+    return $pages;
 	}
 
 	/**
-	 * Load page from cache, if possible
-	 * @return string $pageOutput The rendered HTML
-	 */
-	private function loadPageFromCache()
-	{
-		//TODO write caching layer
-		return '';
-	}
-
-	/** 
-	 * Generates potential page directory from $_SERVER['REQUEST_URI']
-	 * @param array $request The $_SERVER superglobal
+	 * Check for existance of page based on request uri
+	 * @param string $requestUri The request uri
 	 * @return string
 	 */
-	private function pageDirFromRequest($request)   
-	{    		
-		$requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+	private function lookupPage($requestUri, $pages)
+	{			
+		$match = null;
 
-		# Homepage check
-		if(strcmp($requestUri, '/') == 0) $requestUri = '/index';
-		
-		return Config::$pagesFolder . $requestUri;
-	}
+		foreach($pages as $page){			
+			# we have a match return
+			if($requestUri == $page->path)
+			{
+				$match = $page;
+			}
 
-	/**
-	 * Check for existance of page directory
-	 * @param string $pageDir
-	 * @return bool 
-	 */
-	private function pageExists($pageDir)
-	{
-		return is_dir($pageDir);
+			# page has children, iterate
+			if(is_null($match) && !empty($page->children))
+			{
+				$match = $this->lookupPage($requestUri, $page->children);
+			}
+		}
+
+		return $match;
 	}
 	
-	/**
-	 * The physical output buffering of the request page
+	/** 
+	 * Generates potential page directory from $_SERVER['REQUEST_URI']
+	 * @return string
 	 */
-	private function renderPage()
-	{		
-		# No page cache, create, cache and render
-		$page = new Page($this->pageDir);
-		$pageOutput = $page->render();
-
-		return $pageOutput;
+	private function uriFromRequest()   
+	{    		
+		return preg_replace(array('/^\//','/\/$/'), '', parse_url($this->request['REQUEST_URI'], PHP_URL_PATH));
 	}
 }

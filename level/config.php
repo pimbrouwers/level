@@ -14,5 +14,5 @@ class Config {
 	static $pagesCacheFolder = './cache/pages';
 	static $templatesFolder = './templates';
   
-  static $defaultTemplate = 'default.php';
+  static $defaultTemplate = 'index.php';
 }

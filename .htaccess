@@ -1,19 +1,14 @@
 RewriteEngine on
-RewriteBase /
 
 # Error Page(s)
 ErrorDocument 403 /public/errors/403.php
 ErrorDocument 404 /public/errors/404.php
 
-# Prevent access to .txt & .yml files
-RedirectMatch 404 \.(txt|yml)$
+# Prevent access to .yml files
+RedirectMatch 403 .yml$
 
-# Prevent POST's
-# Allow the server to POST to itself
-# Send all other requests to 403
-RewriteCond %{REQUEST_METHOD} POST
-RewriteCond %{REMOTE_ADDR} !127.0.0.1 
-RewriteRule ^ / [F]   
+# Prevent access to level folder
+RedirectMatch 403 ^/level
 
 # Route all unmatched to index.php
 # NC: not case senstitive
