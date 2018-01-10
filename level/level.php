@@ -43,18 +43,18 @@ class Level {
 		{
 			# extract uri from request
 			$requestUri = $this->uriFromRequest();
-			
+
 			# lookup page in $this->pages comparing $requestUri to $page->path
-			$page = $this->lookupPage($requestUri, $this->buildPageTree(Config::$pagesFolder));
+			$page = $this->lookupPage($requestUri, $this->buildPageTree(Helpers::JoinPaths([Config::$pagesFolder])));
 			
-			if(!$page) {				
+			if(!$page) {								
 				# Page doesn't exist
 				Helpers::Http404();
 			}	
-
+			Helpers::PrettyPrint($page);
 			# Cache empty, render page
 			$pageOutput = $page->render();
-
+			
 			# Write output to cache
 			//TODO write caching layer
 		}	
@@ -71,13 +71,13 @@ class Level {
 	{
 		$pages = array();
 		$foldersAndFiles = Helpers::DirectoryContents($dir);
-    
+		
     # prevent empty ordered elements
     if (count($foldersAndFiles) > 0)
     {		
       foreach($foldersAndFiles as $folderOrFile)
       {        
-        $absolutePath = $dir . '/' . $folderOrFile;
+        $absolutePath = Helpers::JoinPaths([$dir, $folderOrFile]);
         
         if(is_dir($absolutePath))
         {
@@ -88,8 +88,8 @@ class Level {
           $page->children = $this->buildPageTree($absolutePath);
         }
       }
-    }
-
+		}
+		
     return $pages;
 	}
 

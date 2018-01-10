@@ -48,7 +48,7 @@ class Page {
 		{
 			extract($pageContent);
 		}	
-
+		
 		# buffer the page
 		ob_start();
 		include_once($this->template);				
@@ -75,12 +75,12 @@ class Page {
 
 				if($pathinfo['extension'] == 'yml')
 				{
-					$filePath = $this->dir . '/' . $folderOrFile;
+					$filePath = Helpers::JoinPaths([$this->dir, $folderOrFile]);
 					break;
 				}
 			}
 		}
-		
+		echo $filePath;
 		return $filePath;
 	}
 
@@ -110,7 +110,8 @@ class Page {
 	 */
 	private function pagePath($dir)
 	{
-		return preg_replace(array('/\d\./', '/^\.\/pages\//', '/index$/'), '', $dir);
+		//TODO fix pages regex, pull from Config::$pagesFolder
+		return preg_replace(array('/\d\./','/^\.\.\/pages\//', '/index$/'), '', $dir);
 	}
 
 	/**
@@ -118,13 +119,13 @@ class Page {
 	 * @return string $templatePath PHP template path
 	 */
 	private function resolveTemplate()
-	{		
-		$templatePath = Config::$templatesFolder . '/' . $this->name . '.php';
-
+	{			
+		$templatePath = Helpers::JoinPaths([Config::$templatesFolder, $this->name . '.php']);
+		
 		if(!file_exists($templatePath))
 		{
-			# default template to config value
-			$templatePath = Config::$templatesFolder . '/' . Config::$defaultTemplate;
+			# default template to config value			
+			$templatePath = Helpers::JoinPaths([Config::$templatesFolder, Config::$defaultTemplate]);
 		}
 
 		return $templatePath;		

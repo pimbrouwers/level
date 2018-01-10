@@ -44,7 +44,17 @@ class Helpers {
     }
 
     self::HttpResponse(500);
-  }
+	}
+	
+	/**
+	 * Joins string[] of path parts into os safe paths
+	 * @param array $paths Pieces to join
+	 * @return string OS safe path
+	 */
+	static function JoinPaths ($paths)
+	{
+		return preg_replace('#/+#',DIRECTORY_SEPARATOR, join(DIRECTORY_SEPARATOR, $paths));
+	}
 
   static function PrettyPrint($obj)
   {
@@ -59,8 +69,8 @@ class Helpers {
    */
   private static function HttpResponse($code)
   {
-    http_response_code($code);
-    include_once(Config::$errorsFolder . '/' . $code . '.php');
+		http_response_code($code);
+    include_once(Helpers::JoinPaths([Config::$errorsFolder, $code . '.php']));
     exit;
   }
 

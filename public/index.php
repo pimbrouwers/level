@@ -1,8 +1,8 @@
 <?php
 
-require_once('vendor/autoload.php');
-require_once('level/config.php');
-require_once('level/level.php');
+require_once('../vendor/autoload.php');
+require_once('../level/config.php');
+require_once('../level/level.php');
 
 use Level\Level;
 use Level\Config;
