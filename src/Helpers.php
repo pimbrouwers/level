@@ -2,8 +2,6 @@
 
 namespace Level;
 
-require_once('config.php');
-
 use Level\Config;
 
 class Helpers {

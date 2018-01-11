@@ -2,10 +2,6 @@
 
 namespace Level;
 
-require_once('config.php');
-require_once('helpers.php');
-require_once('page.php');
-
 use Level\Config;
 use Level\Helpers;
 use Level\Page;
@@ -49,9 +45,8 @@ class Level {
 			
 			if(!$page) {								
 				# Page doesn't exist
-				Helpers::Http404();
+				throw new InvalidArgumentException('The page could not be found.');
 			}	
-			Helpers::PrettyPrint($page);
 			# Cache empty, render page
 			$pageOutput = $page->render();
 			

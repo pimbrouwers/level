@@ -1,11 +1,11 @@
 <?php
 
 require_once('../vendor/autoload.php');
-require_once('../level/config.php');
-require_once('../level/level.php');
 
-use Level\Level;
 use Level\Config;
+use Level\Helpers;
+use Level\Level;
+use Symfony\Component\Yaml\Exception\ParseException;
 
 # Set error level
 if(Config::$devMode) {
@@ -15,6 +15,19 @@ else {
   error_reporting(0);
 }
 
-# Start app and process request
+# Start app
 $app = new Level($_SERVER, $_GET);
-$app->handleRequest();
+
+# Process request
+try
+{
+	$app->handleRequest();
+}
+catch (InvalidArgumentException $e)
+{
+	Helpers::Http404();
+}
+catch (ParseException $e)
+{
+	Helpers::Http500($e);
+}

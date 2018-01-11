@@ -2,13 +2,9 @@
 
 namespace Level;
 
-require_once('config.php');
-require_once('helpers.php');
-require_once('parsers/yaml.php');
-
 use Level\Config;
 use Level\Helpers;
-use Level\YamlParser;
+use Level\Parsers\YamlParser;
 
 class Page {
 
@@ -80,7 +76,7 @@ class Page {
 				}
 			}
 		}
-		echo $filePath;
+
 		return $filePath;
 	}
 
