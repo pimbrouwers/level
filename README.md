@@ -1,2 +1,2 @@
 # level
-Dead simple, database-less and cheap content management
+Dead simple, database-less content management
